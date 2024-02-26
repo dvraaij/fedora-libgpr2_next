@@ -1,0 +1,16 @@
+--- a/gpr2.gpr
++++ b/gpr2.gpr
+@@ -38,11 +38,12 @@
+                         "src/kb",
+                         KB_Build,
+                         "langkit/" & Langkit_Src & "/src");
+-   for Library_Name use "gpr2";
++   for Library_Name use "gpr2_next";
+ 
+    for Object_Dir use Build_Root & "/" & Build & "/obj-" & Library_Type;
+    for Library_Dir use Build_Root & "/" & Build & "/lib-" & Library_Type;
+    for Library_Kind use Library_Type;
++   for Library_Version use "libgpr2_next.so." & external("VERSION");
+ 
+    --------------
+    -- Compiler --
