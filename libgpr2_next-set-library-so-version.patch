@@ -1,9 +1,9 @@
 --- a/gpr2.gpr
 +++ b/gpr2.gpr
-@@ -38,11 +38,12 @@
+@@ -22,11 +22,12 @@
                          "src/kb",
                          KB_Build,
-                         "langkit/" & Langkit_Src & "/src");
+                         "langkit/gen/src");
 -   for Library_Name use "gpr2";
 +   for Library_Name use "gpr2_next";
  

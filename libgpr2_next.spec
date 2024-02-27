@@ -1,8 +1,8 @@
 # Upstream source information.
 %global upstream_owner        AdaCore
 %global upstream_name         gpr
-%global upstream_commit_date  20230509
-%global upstream_commit       092edbe4d9de158787c0960ebd149116ee39fc4a
+%global upstream_commit_date  20240104
+%global upstream_commit       5979451d7f3e27095f8eb48ab508f7c3e6266f83
 %global upstream_shortcommit  %(c=%{upstream_commit}; echo ${c:0:7})
 
 Name:           libgpr2_next
@@ -25,11 +25,6 @@ BuildRequires:  gprconfig-kb
 BuildRequires:  gnatcoll-core-devel
 BuildRequires:  gnatcoll-gmp-devel
 BuildRequires:  gnatcoll-iconv-devel
-%if %{with check}
-BuildRequires:  python-devel
-BuildRequires:  python-setuptools
-BuildRequires:  python3-e3-testsuite
-%endif
 
 # Build only on architectures where GPRbuild is available.
 ExclusiveArch:  %{GPRbuild_arches}
@@ -76,11 +71,11 @@ applications that use the GNAT project manager library.
 # (using `t`, jump to end of script) or exit with a non-zero exit code if the
 # substitution failed (using `q1`, quit with exit code 1).
 sed --in-place \
-    --expression='21 { s,18.0w,%{upstream_commit_date} (next), ; t; q1 }' \
-    --expression='24 { s,19940713,%{upstream_release_date},    ; t; q1 }' \
-    --expression='26 { s,"2016",Date (1 .. 4),                 ; t; q1 }' \
-    --expression='31 { s,Gnatpro,GPL,                          ; t; q1 }' \
-    tools/src/gpr2-version.ads
+    --expression='11 { s,18.0w,%{upstream_commit_date} (next), ; t; q1 }' \
+    --expression='14 { s,19940713,%{upstream_release_date},    ; t; q1 }' \
+    --expression='16 { s,"2016",Date (1 .. 4),                 ; t; q1 }' \
+    --expression='21 { s,Gnatpro,GPL,                          ; t; q1 }' \
+    src/lib/gpr2-version.ads
 
 # Initialize some variables.
 make LIBGPR2_TYPES='relocatable' PYTHON='%{python3}' \
@@ -99,10 +94,6 @@ export VERSION=%{upstream_commit_date}
 # Build the library.
 %{make_build} GPRBUILD_OPTIONS='%{GPRbuild_flags}' build-lib-relocatable
 
-# Additional flags to link the executables dynamically with the GNAT runtime
-# and make the executables (tools) position independent.
-%global GPRbuild_flags_pie -cargs -fPIC -largs -pie -bargs -shared -gargs
-
 
 #############
 ## Install ##
@@ -112,18 +103,12 @@ export VERSION=%{upstream_commit_date}
 
 # Install the library.
 gprinstall %{GPRinstall_flags} --no-build-var \
-           -XVERSION=%{upstream_commit_date} -XGPR2_BUILD=release \
+           -XVERSION=%{upstream_commit_date} -XGPR2_BUILD=release_checks \
            -XLIBRARY_TYPE=relocatable -XXMLADA_BUILD=relocatable \
            -P gpr2.gpr
 
 # Fix up some things that GPRinstall does wrong.
 ln --symbolic --force %{name}.so.%{upstream_commit_date} %{buildroot}%{_libdir}/%{name}.so
-
-# Keep a copy of the unmodified GNAT project files when running the test suite.
-%if %{with check}
-%global GNAT_project_dir_orig %{_GNAT_project_dir}_orig
-cp -r %{buildroot}%{_GNAT_project_dir} %{buildroot}%{GNAT_project_dir_orig}
-%endif
 
 # Make the generated usage project file architecture-independent.
 sed --regexp-extended --in-place \
@@ -143,15 +128,13 @@ sed --regexp-extended --in-place \
 # 5: Replace the value of Library_ALI_Dir with a pathname based on
 #    Directories.Libdir.
 
-cat %{buildroot}%{_GNAT_project_dir}/gpr2.gpr
-
 
 ###########
 ## Files ##
 ###########
 
 %files
-%license LICENSE
+%license LICENSE-lib
 %doc README*
 %{_libdir}/%{name}.so.%{upstream_commit_date}
 
@@ -169,5 +152,8 @@ cat %{buildroot}%{_GNAT_project_dir}/gpr2.gpr
 ###############
 
 %changelog
+* Tue Feb 27 2024 Dennis van Raaij <dvraaij@fedoraproject.org> - 0^20240104git5979451-1
+- Updated to snapshot: Git commit 5979451 (24.2-next), 2024-01-04.
+
 * Tue Feb 27 2024 Dennis van Raaij <dvraaij@fedoraproject.org> - 0^20230509git092edbe-1
 - New package, snapshot: Git commit 092edbe (next), 2023-05-09.
